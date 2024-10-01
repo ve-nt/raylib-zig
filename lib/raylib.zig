@@ -725,6 +725,23 @@ pub const Matrix = extern struct {
     pub fn toFloatV(self: Matrix) math.float16 {
         return math.matrixToFloatV(self);
     }
+
+    pub fn format(m: Matrix, comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) !void {
+        try writer.print(
+            \\
+            \\ ┌                           ┐
+            \\ │{d:<6.2} {d:<6.2} {d:<6.2} {d:<6.2}│
+            \\ │{d:<6.2} {d:<6.2} {d:<6.2} {d:<6.2}│
+            \\ │{d:<6.2} {d:<6.2} {d:<6.2} {d:<6.2}│
+            \\ │{d:<6.2} {d:<6.2} {d:<6.2} {d:<6.2}│
+            \\ └                           ┘
+        , .{
+            m.m0, m.m4, m.m8, m.m12, // Matrix first row (4 components)
+            m.m1, m.m5, m.m9, m.m13, // Matrix second row (4 components)
+            m.m2, m.m6, m.m10, m.m14, // Matrix third row (4 components)
+            m.m3, m.m7, m.m11, m.m15, // Matrix fourth row (4 components)
+        });
+    }
 };
 
 pub const Color = extern struct {
