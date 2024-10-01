@@ -407,6 +407,10 @@ pub const Vector3 = extern struct {
     pub fn refract(self: Vector3, n: Vector3, r: f32) Vector3 {
         return math.vector3Refract(self, n, r);
     }
+
+    pub fn format(v: Vector3, comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) !void {
+        try writer.print("<{d}, {d}, {d}>", .{ v.x, v.y, v.z });
+    }
 };
 
 pub const Vector4 = extern struct {
