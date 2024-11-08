@@ -106,6 +106,7 @@ pub fn linkWithEmscripten(
     emcc_command.addArgs(&[_][]const u8{
         "-o",
         emccOutputDir ++ emccOutputFile,
+        "-sUSE_OFFSET_CONVERTER",
         "-sFULL-ES3=1",
         "-sUSE_GLFW=3",
         "-sASYNCIFY",
