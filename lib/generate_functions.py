@@ -367,6 +367,8 @@ def parse_header(header_name: str, output_file: str, ext_file: str, prefix: str,
             "DrawSplineBezierQuadratic",
             "DrawSplineBezierCubic",
             "ImageKernelConvolution",
+            "GuiSetStyle",
+            "GuiGetStyle"
         ]
 
         if func_name in manual or "FromMemory" in func_name:
