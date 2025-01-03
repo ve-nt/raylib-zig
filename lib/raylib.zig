@@ -1305,7 +1305,7 @@ pub const Font = extern struct {
 
     /// Check if a font is ready
     pub fn isReady(self: Font) bool {
-        return rl.isFontReady(self);
+        return rl.isFontValid(self);
     }
 
     /// Export font as code file, returns true on success
@@ -2066,16 +2066,16 @@ pub fn decodeDataBase64(data: []const u8) []u8 {
 }
 
 pub fn computeCRC32(data: []u8) u32 {
-    return cdef.ComputeCRC32(data.ptr, data.len);
+    return cdef.ComputeCRC32(@as([*c]u8, @ptrCast(data)), @as(c_int, @intCast(data.len)));
 }
 
 pub fn computeMD5(data: []u8) [4]u32 {
-    const res: [*]c_int = cdef.ComputeMD5(data.ptr, data.len);
+    const res: [*]c_uint = cdef.ComputeMD5(@as([*c]u8, @ptrCast(data)), @as(c_int, @intCast(data.len)));
     return res[0..4].*;
 }
 
 pub fn computeSHA1(data: []u8) [5]u32 {
-    const res: [*]c_int = cdef.ComputeSHA1(data.ptr, data.len);
+    const res: [*]c_uint = cdef.ComputeSHA1(@as([*c]u8, @ptrCast(data)), @as(c_int, @intCast(data.len)));
     return res[0..5].*;
 }
 
