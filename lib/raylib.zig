@@ -16,10 +16,21 @@ pub const RaylibError = error{
     LoadFileData,
     LoadImageColors,
     LoadImagePalette,
+    LoadFont,
     LoadFontData,
     LoadCodepoints,
+    LoadMaterial,
     LoadMaterials,
     LoadModelAnimations,
+    LoadShader,
+    LoadImage,
+    LoadModel,
+    LoadTexture,
+    LoadRenderTexture,
+    LoadWave,
+    LoadSound,
+    LoadMusic,
+    LoadAudioStream,
 };
 
 pub const Vector2 = extern struct {
@@ -839,27 +850,27 @@ pub const Image = extern struct {
     format: PixelFormat,
 
     /// Load image from file into CPU memory (RAM)
-    pub fn init(fileName: [*:0]const u8) Image {
+    pub fn init(fileName: [*:0]const u8) RaylibError!Image {
         return rl.loadImage(fileName);
     }
 
     /// Load image from RAW file data
-    pub fn initRaw(fileName: [*:0]const u8, width: i32, height: i32, format: PixelFormat, headerSize: i32) Image {
+    pub fn initRaw(fileName: [*:0]const u8, width: i32, height: i32, format: PixelFormat, headerSize: i32) RaylibError!Image {
         return rl.loadImageRaw(fileName, width, height, format, headerSize);
     }
 
     /// Load image sequence from file (frames appended to image.data)
-    pub fn initAnim(fileName: [*:0]const u8, frames: *i32) Image {
+    pub fn initAnim(fileName: [*:0]const u8, frames: *i32) RaylibError!Image {
         return rl.loadImageAnim(fileName, frames);
     }
 
     /// Load image from GPU texture data
-    pub fn fromTexture(texture: Texture) Image {
+    pub fn fromTexture(texture: Texture) RaylibError!Image {
         return rl.loadImageFromTexture(texture);
     }
 
     /// Load image from screen buffer and (screenshot)
-    pub fn fromScreen() Image {
+    pub fn fromScreen() RaylibError!Image {
         return rl.loadImageFromScreen();
     }
 
@@ -869,12 +880,12 @@ pub const Image = extern struct {
     }
 
     /// Create an image from text (default font)
-    pub fn initText(text: [*:0]const u8, fontSize: i32, color: Color) Image {
+    pub fn initText(text: [*:0]const u8, fontSize: i32, color: Color) RaylibError!Image {
         return rl.imageText(text, fontSize, color);
     }
 
     /// Create an image from text (custom sprite font)
-    pub fn initTextEx(font: Font, text: [*:0]const u8, fontSize: f32, spacing: f32, t: Color) Image {
+    pub fn initTextEx(font: Font, text: [*:0]const u8, fontSize: f32, spacing: f32, t: Color) RaylibError!Image {
         return rl.imageTextEx(font, text, fontSize, spacing, t);
     }
 
@@ -1159,11 +1170,11 @@ pub const Image = extern struct {
     }
 
     /// Load texture from image data
-    pub fn toTexture(self: Image) Texture {
+    pub fn toTexture(self: Image) RaylibError!Texture {
         return Texture.fromImage(self);
     }
 
-    pub fn asCubemap(self: Image, layout: CubemapLayout) Texture {
+    pub fn asCubemap(self: Image, layout: CubemapLayout) RaylibError!Texture {
         return Texture.fromCubemap(self, layout);
     }
 };
@@ -1175,17 +1186,17 @@ pub const Texture = extern struct {
     mipmaps: c_int,
     format: PixelFormat,
 
-    pub fn init(fileName: [*:0]const u8) Texture {
+    pub fn init(fileName: [*:0]const u8) RaylibError!Texture {
         return rl.loadTexture(fileName);
     }
 
     /// Load texture from image data
-    pub fn fromImage(image: Image) Texture {
+    pub fn fromImage(image: Image) RaylibError!Texture {
         return rl.loadTextureFromImage(image);
     }
 
     /// Load cubemap from image, multiple image cubemap layouts supported
-    pub fn fromCubemap(image: Image, layout: CubemapLayout) Texture {
+    pub fn fromCubemap(image: Image, layout: CubemapLayout) RaylibError!Texture {
         return rl.loadTextureCubemap(image, layout);
     }
 
@@ -1232,7 +1243,7 @@ pub const RenderTexture = extern struct {
     texture: Texture,
     depth: Texture,
 
-    pub fn init(width: i32, height: i32) RenderTexture {
+    pub fn init(width: i32, height: i32) RaylibError!RenderTexture {
         return rl.loadRenderTexture(width, height);
     }
 
@@ -1279,22 +1290,22 @@ pub const Font = extern struct {
     glyphs: [*c]GlyphInfo,
 
     /// Load font from file into GPU memory (VRAM)
-    pub fn init(fileName: [*:0]const u8) Font {
+    pub fn init(fileName: [*:0]const u8) RaylibError!Font {
         return rl.loadFont(fileName);
     }
 
     /// Load font from file with extended parameters, use null for fontChars to load the default character set
-    pub fn initEx(fileName: [*:0]const u8, fontSize: i32, fontChars: ?[]i32) Font {
+    pub fn initEx(fileName: [*:0]const u8, fontSize: i32, fontChars: ?[]i32) RaylibError!Font {
         return rl.loadFontEx(fileName, fontSize, fontChars);
     }
 
     /// Load font from Image (XNA style)
-    pub fn fromImage(image: Image, key: Color, firstChar: i32) Font {
+    pub fn fromImage(image: Image, key: Color, firstChar: i32) RaylibError!Font {
         return rl.loadFontFromImage(image, key, firstChar);
     }
 
     /// Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
-    pub fn fromMemory(fileType: [*:0]const u8, fileData: ?[]const u8, fontSize: i32, fontChars: ?[]i32) Font {
+    pub fn fromMemory(fileType: [*:0]const u8, fileData: ?[]const u8, fontSize: i32, fontChars: ?[]i32) RaylibError!Font {
         return rl.loadFontFromMemory(fileType, fileData, fontSize, fontChars);
     }
 
@@ -1445,12 +1456,12 @@ pub const Model = extern struct {
     bindPose: [*c]Transform,
 
     /// Load model from file (meshes and materials)
-    pub fn init(fileName: [*:0]const u8) Model {
+    pub fn init(fileName: [*:0]const u8) RaylibError!Model {
         return rl.loadModel(fileName);
     }
 
     /// Load model from generated mesh (default material)
-    pub fn fromMesh(mesh: Mesh) Model {
+    pub fn fromMesh(mesh: Mesh) RaylibError!Model {
         return rl.loadModelFromMesh(mesh);
     }
 
@@ -1981,7 +1992,7 @@ pub fn setWindowIcons(images: []Image) void {
 }
 
 /// Load shader from files and bind default locations
-pub fn loadShader(vsFileName: ?[*:0]const u8, fsFileName: ?[*:0]const u8) Shader {
+pub fn loadShader(vsFileName: ?[*:0]const u8, fsFileName: ?[*:0]const u8) RaylibError!Shader {
     var vsFileNameFinal = @as([*c]const u8, 0);
     var fsFileNameFinal = @as([*c]const u8, 0);
     if (vsFileName) |vsFileNameSure| {
@@ -1990,11 +2001,13 @@ pub fn loadShader(vsFileName: ?[*:0]const u8, fsFileName: ?[*:0]const u8) Shader
     if (fsFileName) |fsFileNameSure| {
         fsFileNameFinal = @as([*c]const u8, @ptrCast(fsFileNameSure));
     }
-    return cdef.LoadShader(vsFileNameFinal, fsFileNameFinal);
+    const shader = cdef.LoadShader(vsFileNameFinal, fsFileNameFinal);
+    const isValid = cdef.IsShaderValid(shader);
+    return if (isValid) shader else RaylibError.LoadShader;
 }
 
 /// Load shader from code strings and bind default locations
-pub fn loadShaderFromMemory(vsCode: ?[*:0]const u8, fsCode: ?[*:0]const u8) Shader {
+pub fn loadShaderFromMemory(vsCode: ?[*:0]const u8, fsCode: ?[*:0]const u8) RaylibError!Shader {
     var vsCodeFinal = @as([*c]const u8, 0);
     var fsCodeFinal = @as([*c]const u8, 0);
     if (vsCode) |vsCodeSure| {
@@ -2003,7 +2016,9 @@ pub fn loadShaderFromMemory(vsCode: ?[*:0]const u8, fsCode: ?[*:0]const u8) Shad
     if (fsCode) |fsCodeSure| {
         fsCodeFinal = @as([*c]const u8, @ptrCast(fsCodeSure));
     }
-    return cdef.LoadShaderFromMemory(vsCodeFinal, fsCodeFinal);
+    const shader = cdef.LoadShaderFromMemory(vsCodeFinal, fsCodeFinal);
+    const isValid = cdef.IsShaderValid(shader);
+    return if (isValid) shader else RaylibError.LoadShader;
 }
 
 /// Load file data as byte array (read)
@@ -2079,13 +2094,68 @@ pub fn computeSHA1(data: []u8) [5]u32 {
     return res[0..5].*;
 }
 
-pub fn loadImageAnimFromMemory(fileType: [*:0]const u8, fileData: []const u8, frames: *i32) Image {
-    return cdef.LoadImageAnimFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileData)), @as(c_int, @intCast(fileData.len)), @as([*c]c_int, @ptrCast(frames)));
+/// Load image from file into CPU memory (RAM)
+pub fn loadImage(fileName: [*:0]const u8) RaylibError!Image {
+    const image = cdef.LoadImage(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+/// Load image from RAW file data
+pub fn loadImageRaw(fileName: [*:0]const u8, width: i32, height: i32, format: PixelFormat, headerSize: i32) RaylibError!Image {
+    const image = cdef.LoadImageRaw(@as([*c]const u8, @ptrCast(fileName)), @as(c_int, width), @as(c_int, height), format, @as(c_int, headerSize));
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+/// Load image sequence from file (frames appended to image.data)
+pub fn loadImageAnim(fileName: [*:0]const u8, frames: *i32) RaylibError!Image {
+    const image = cdef.LoadImageAnim(@as([*c]const u8, @ptrCast(fileName)), @as([*c]c_int, @ptrCast(frames)));
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+/// Load image from GPU texture data
+pub fn loadImageFromTexture(texture: Texture2D) RaylibError!Image {
+    const image = cdef.LoadImageFromTexture(texture);
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+/// Load image from screen buffer and (screenshot)
+pub fn loadImageFromScreen() RaylibError!Image {
+    const image = cdef.LoadImageFromScreen();
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+pub fn loadImageAnimFromMemory(fileType: [*:0]const u8, fileData: []const u8, frames: *i32) RaylibError!Image {
+    const image = cdef.LoadImageAnimFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileData)), @as(c_int, @intCast(fileData.len)), @as([*c]c_int, @ptrCast(frames)));
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
 }
 
 /// Load image from memory buffer, fileType refers to extension: i.e. '.png'
-pub fn loadImageFromMemory(fileType: [*:0]const u8, fileData: []const u8) Image {
-    return cdef.LoadImageFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileData)), @as(c_int, @intCast(fileData.len)));
+pub fn loadImageFromMemory(fileType: [*:0]const u8, fileData: []const u8) RaylibError!Image {
+    const image = cdef.LoadImageFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileData)), @as(c_int, @intCast(fileData.len)));
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+/// Create an image from text (default font)
+pub fn imageText(text: [*:0]const u8, fontSize: i32, color: Color) RaylibError!Image {
+    // TODO: ImageText requires SUPPORT_MODULE_RTEXT. Error out if not loaded.
+    const image = cdef.ImageText(@as([*c]const u8, @ptrCast(text)), @as(c_int, fontSize), color);
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
+}
+
+/// Create an image from text (custom sprite font)
+pub fn imageTextEx(font: Font, text: [*:0]const u8, fontSize: f32, spacing: f32, tint: Color) RaylibError!Image {
+    // TODO: ImageTextEx requires SUPPORT_MODULE_RTEXT. Error out if not loaded.
+    const image = cdef.ImageTextEx(font, @as([*c]const u8, @ptrCast(text)), fontSize, spacing, tint);
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
 }
 
 /// Load color data from image as a Color array (RGBA - 32bit)
@@ -2113,19 +2183,64 @@ pub fn loadImagePalette(image: Image, maxPaletteSize: i32) RaylibError![]Color {
     return res;
 }
 
+/// Load texture from file into GPU memory (VRAM)
+pub fn loadTexture(fileName: [*:0]const u8) RaylibError!Texture2D {
+    const texture = cdef.LoadTexture(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsTextureValid(texture);
+    return if (isValid) texture else RaylibError.LoadTexture;
+}
+
+/// Load texture from image data
+pub fn loadTextureFromImage(image: Image) RaylibError!Texture2D {
+    const texture = cdef.LoadTextureFromImage(image);
+    const isValid = cdef.IsTextureValid(texture);
+    return if (isValid) texture else RaylibError.LoadTexture;
+}
+
+/// Load cubemap from image, multiple image cubemap layouts supported
+pub fn loadTextureCubemap(image: Image, layout: CubemapLayout) RaylibError!TextureCubemap {
+    const texture = cdef.LoadTextureCubemap(image, layout);
+    const isValid = cdef.IsTextureValid(texture);
+    return if (isValid) texture else RaylibError.LoadTexture;
+}
+
+/// Load texture for rendering (framebuffer)
+pub fn loadRenderTexture(width: i32, height: i32) RaylibError!RenderTexture2D {
+    const render_texture = cdef.LoadRenderTexture(@as(c_int, width), @as(c_int, height));
+    const isValid = cdef.IsRenderTextureValid(render_texture);
+    return if (isValid) render_texture else RaylibError.LoadRenderTexture;
+}
+
+/// Get the default Font
+pub fn getFontDefault() RaylibError!Font {
+    // TODO: GetFontDefault requires SUPPORT_DEFAULT_FONT. Error out if unset.
+    const font = cdef.GetFontDefault();
+    const isValid = cdef.IsFontValid(font);
+    return if (isValid) font else RaylibError.LoadFont;
+}
+
+/// Load font from file into GPU memory (VRAM)
+pub fn loadFont(fileName: [*:0]const u8) RaylibError!Font {
+    const font = cdef.LoadFont(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsFontValid(font);
+    return if (isValid) font else RaylibError.LoadFont;
+}
+
 /// Load font from file with extended parameters, use null for fontChars to load the default character set
-pub fn loadFontEx(fileName: [*:0]const u8, fontSize: i32, fontChars: ?[]i32) Font {
+pub fn loadFontEx(fileName: [*:0]const u8, fontSize: i32, fontChars: ?[]i32) RaylibError!Font {
     var fontCharsFinal = @as([*c]c_int, 0);
     var fontCharsLen: c_int = @as(c_int, 0);
     if (fontChars) |fontCharsSure| {
         fontCharsFinal = @as([*c]c_int, @ptrCast(fontCharsSure));
         fontCharsLen = @as(i32, @intCast(fontCharsSure.len));
     }
-    return cdef.LoadFontEx(@as([*c]const u8, @ptrCast(fileName)), @as(c_int, fontSize), fontCharsFinal, fontCharsLen);
+    const font = cdef.LoadFontEx(@as([*c]const u8, @ptrCast(fileName)), @as(c_int, fontSize), fontCharsFinal, fontCharsLen);
+    const isValid = cdef.IsFontValid(font);
+    return if (isValid) font else RaylibError.LoadFont;
 }
 
 /// Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
-pub fn loadFontFromMemory(fileType: [*:0]const u8, fileData: ?[]const u8, fontSize: i32, fontChars: ?[]i32) Font {
+pub fn loadFontFromMemory(fileType: [*:0]const u8, fileData: ?[]const u8, fontSize: i32, fontChars: ?[]i32) RaylibError!Font {
     var fileDataFinal = @as([*c]const u8, 0);
     var fileDataLen: i32 = 0;
     if (fileData) |fileDataSure| {
@@ -2133,7 +2248,16 @@ pub fn loadFontFromMemory(fileType: [*:0]const u8, fileData: ?[]const u8, fontSi
         fileDataLen = @as(i32, @intCast(fileDataSure.len));
     }
     const codepointCount: c_int = if (fontChars) |fontCharsSure| @intCast(fontCharsSure.len) else 0;
-    return cdef.LoadFontFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileDataFinal)), @as(c_int, @intCast(fileDataLen)), @as(c_int, fontSize), @as([*c]c_int, @ptrCast(fontChars)), codepointCount);
+    const font = cdef.LoadFontFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileDataFinal)), @as(c_int, @intCast(fileDataLen)), @as(c_int, fontSize), @as([*c]c_int, @ptrCast(fontChars)), codepointCount);
+    const isValid = cdef.IsFontValid(font);
+    return if (isValid) font else RaylibError.LoadFont;
+}
+
+/// Load font from Image (XNA style)
+pub fn loadFontFromImage(image: Image, key: Color, firstChar: i32) RaylibError!Font {
+    const font = cdef.LoadFontFromImage(image, key, @as(c_int, firstChar));
+    const isValid = cdef.IsFontValid(font);
+    return if (isValid) font else RaylibError.LoadFont;
 }
 
 /// Load font data for further use
@@ -2214,6 +2338,13 @@ pub fn drawMeshInstanced(mesh: Mesh, material: Material, transforms: []const Mat
     cdef.DrawMeshInstanced(mesh, material, @as([*c]const Matrix, @ptrCast(transforms)), @as(c_int, @intCast(transforms.len)));
 }
 
+/// Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
+pub fn loadMaterialDefault() RaylibError!Material {
+    const material = cdef.LoadMaterialDefault();
+    const isValid = cdef.IsMaterialValid(material);
+    return if (isValid) material else RaylibError.LoadMaterial;
+}
+
 /// Load materials from model file
 pub fn loadMaterials(fileName: [*:0]const u8) RaylibError![]Material {
     var materialCount: i32 = 0;
@@ -2224,7 +2355,27 @@ pub fn loadMaterials(fileName: [*:0]const u8) RaylibError![]Material {
 
     res.ptr = @as([*]Material, @ptrCast(ptr));
     res.len = @as(usize, @intCast(materialCount));
+
+    for (res) |r| {
+        if (!cdef.IsMaterialValid(r))
+            return RaylibError.LoadMaterial;
+    }
+
     return res;
+}
+
+/// Load model from files (meshes and materials)
+pub fn loadModel(fileName: [*:0]const u8) RaylibError!Model {
+    const model = cdef.LoadModel(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsModelValid(model);
+    return if (isValid) model else RaylibError.LoadModel;
+}
+
+/// Load model from generated mesh (default material)
+pub fn loadModelFromMesh(mesh: Mesh) RaylibError!Model {
+    const model = cdef.LoadModelFromMesh(mesh);
+    const isValid = cdef.IsModelValid(model);
+    return if (isValid) model else RaylibError.LoadModel;
 }
 
 /// Load model animations from file
@@ -2245,9 +2396,25 @@ pub fn unloadModelAnimations(animations: []ModelAnimation) void {
     cdef.UnloadModelAnimations(@as([*c]ModelAnimation, @ptrCast(animations)), @as(c_int, @intCast(animations.len)));
 }
 
+/// Load sound from file
+pub fn loadSound(fileName: [*:0]const u8) RaylibError!Sound {
+    const sound = cdef.LoadSound(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsSoundValid(sound);
+    return if (isValid) sound else RaylibError.LoadSound;
+}
+
+/// Load wave data from file
+pub fn loadWave(fileName: [*:0]const u8) RaylibError!Wave {
+    const wave = cdef.LoadWave(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsWaveValid(wave);
+    return if (isValid) wave else RaylibError.LoadWave;
+}
+
 /// Load wave from memory buffer, fileType refers to extension: i.e. '.wav'
-pub fn loadWaveFromMemory(fileType: [*:0]const u8, fileData: []const u8) Wave {
-    return cdef.LoadWaveFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileData)), @as(c_int, @intCast(fileData.len)));
+pub fn loadWaveFromMemory(fileType: [*:0]const u8, fileData: []const u8) RaylibError!Wave {
+    const wave = cdef.LoadWaveFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(fileData)), @as(c_int, @intCast(fileData.len)));
+    const isValid = cdef.IsWaveValid(wave);
+    return if (isValid) wave else RaylibError.LoadWave;
 }
 
 /// Load samples data from wave as a 32bit float data array
@@ -2258,9 +2425,25 @@ pub fn loadWaveSamples(wave: Wave) []f32 {
     return res;
 }
 
+/// Load music stream from file
+pub fn loadMusicStream(fileName: [*:0]const u8) RaylibError!Music {
+    const music = cdef.LoadMusicStream(@as([*c]const u8, @ptrCast(fileName)));
+    const isValid = cdef.IsMusicValid(music);
+    return if (isValid) music else RaylibError.LoadMusic;
+}
+
 /// Load music stream from data
-pub fn loadMusicStreamFromMemory(fileType: [*:0]const u8, data: []const u8) Music {
-    return cdef.LoadMusicStreamFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(data)), @as(c_int, @intCast(data.len)));
+pub fn loadMusicStreamFromMemory(fileType: [*:0]const u8, data: []const u8) RaylibError!Music {
+    const music = cdef.LoadMusicStreamFromMemory(@as([*c]const u8, @ptrCast(fileType)), @as([*c]const u8, @ptrCast(data)), @as(c_int, @intCast(data.len)));
+    const isValid = cdef.IsMusicValid(music);
+    return if (isValid) music else RaylibError.LoadMusic;
+}
+
+/// Load audio stream (to stream raw audio pcm data)
+pub fn loadAudioStream(sampleRate: u32, sampleSize: u32, channels: u32) RaylibError!AudioStream {
+    const audio_stream = cdef.LoadAudioStream(@as(c_uint, sampleRate), @as(c_uint, sampleSize), @as(c_uint, channels));
+    const isValid = cdef.IsAudioStreamValid(audio_stream);
+    return if (isValid) audio_stream else RaylibError.LoadAudioStream;
 }
 
 /// Draw lines sequence (using gl lines)
@@ -2313,8 +2496,10 @@ pub fn imageKernelConvolution(image: *Image, kernel: []const f32) void {
 }
 
 /// Generate image font atlas using chars info
-pub fn genImageFontAtlas(chars: []const GlyphInfo, recs: [][]Rectangle, fontSize: i32, padding: i32, packMethod: i32) Image {
-    return cdef.GenImageFontAtlas(@as([*c]const GlyphInfo, @ptrCast(chars)), @as([*c][*c]Rectangle, @ptrCast(recs)), @as(c_int, @intCast(recs.len)), @as(c_int, fontSize), @as(c_int, padding), @as(c_int, packMethod));
+pub fn genImageFontAtlas(chars: []const GlyphInfo, recs: [][]Rectangle, fontSize: i32, padding: i32, packMethod: i32) RaylibError!Image {
+    const image = cdef.GenImageFontAtlas(@as([*c]const GlyphInfo, @ptrCast(chars)), @as([*c][*c]Rectangle, @ptrCast(recs)), @as(c_int, @intCast(recs.len)), @as(c_int, fontSize), @as(c_int, padding), @as(c_int, packMethod));
+    const isValid = cdef.IsImageValid(image);
+    return if (isValid) image else RaylibError.LoadImage;
 }
 
 /// Unload font chars info data (RAM)
@@ -3613,31 +3798,6 @@ pub fn getCollisionRec(rec1: Rectangle, rec2: Rectangle) Rectangle {
     return cdef.GetCollisionRec(rec1, rec2);
 }
 
-/// Load image from file into CPU memory (RAM)
-pub fn loadImage(fileName: [*:0]const u8) Image {
-    return cdef.LoadImage(@as([*c]const u8, @ptrCast(fileName)));
-}
-
-/// Load image from RAW file data
-pub fn loadImageRaw(fileName: [*:0]const u8, width: i32, height: i32, format: PixelFormat, headerSize: i32) Image {
-    return cdef.LoadImageRaw(@as([*c]const u8, @ptrCast(fileName)), @as(c_int, width), @as(c_int, height), format, @as(c_int, headerSize));
-}
-
-/// Load image sequence from file (frames appended to image.data)
-pub fn loadImageAnim(fileName: [*:0]const u8, frames: *i32) Image {
-    return cdef.LoadImageAnim(@as([*c]const u8, @ptrCast(fileName)), @as([*c]c_int, @ptrCast(frames)));
-}
-
-/// Load image from GPU texture data
-pub fn loadImageFromTexture(texture: Texture2D) Image {
-    return cdef.LoadImageFromTexture(texture);
-}
-
-/// Load image from screen buffer and (screenshot)
-pub fn loadImageFromScreen() Image {
-    return cdef.LoadImageFromScreen();
-}
-
 /// Check if an image is valid (data and parameters)
 pub fn isImageValid(image: Image) bool {
     return cdef.IsImageValid(image);
@@ -3721,16 +3881,6 @@ pub fn imageFromImage(image: Image, rec: Rectangle) Image {
 /// Create an image from a selected channel of another image (GRAYSCALE)
 pub fn imageFromChannel(image: Image, selectedChannel: i32) Image {
     return cdef.ImageFromChannel(image, @as(c_int, selectedChannel));
-}
-
-/// Create an image from text (default font)
-pub fn imageText(text: [*:0]const u8, fontSize: i32, color: Color) Image {
-    return cdef.ImageText(@as([*c]const u8, @ptrCast(text)), @as(c_int, fontSize), color);
-}
-
-/// Create an image from text (custom sprite font)
-pub fn imageTextEx(font: Font, text: [*:0]const u8, fontSize: f32, spacing: f32, tint: Color) Image {
-    return cdef.ImageTextEx(font, @as([*c]const u8, @ptrCast(text)), fontSize, spacing, tint);
 }
 
 /// Convert image data to desired format
@@ -3983,26 +4133,6 @@ pub fn imageDrawTextEx(dst: *Image, font: Font, text: [*:0]const u8, position: V
     cdef.ImageDrawTextEx(@as([*c]Image, @ptrCast(dst)), font, @as([*c]const u8, @ptrCast(text)), position, fontSize, spacing, tint);
 }
 
-/// Load texture from file into GPU memory (VRAM)
-pub fn loadTexture(fileName: [*:0]const u8) Texture2D {
-    return cdef.LoadTexture(@as([*c]const u8, @ptrCast(fileName)));
-}
-
-/// Load texture from image data
-pub fn loadTextureFromImage(image: Image) Texture2D {
-    return cdef.LoadTextureFromImage(image);
-}
-
-/// Load cubemap from image, multiple image cubemap layouts supported
-pub fn loadTextureCubemap(image: Image, layout: CubemapLayout) TextureCubemap {
-    return cdef.LoadTextureCubemap(image, layout);
-}
-
-/// Load texture for rendering (framebuffer)
-pub fn loadRenderTexture(width: i32, height: i32) RenderTexture2D {
-    return cdef.LoadRenderTexture(@as(c_int, width), @as(c_int, height));
-}
-
 /// Check if a texture is valid (loaded in GPU)
 pub fn isTextureValid(texture: Texture2D) bool {
     return cdef.IsTextureValid(texture);
@@ -4161,21 +4291,6 @@ pub fn setPixelColor(dstPtr: *anyopaque, color: Color, format: PixelFormat) void
 /// Get pixel data size in bytes for certain format
 pub fn getPixelDataSize(width: i32, height: i32, format: PixelFormat) i32 {
     return @as(i32, cdef.GetPixelDataSize(@as(c_int, width), @as(c_int, height), format));
-}
-
-/// Get the default Font
-pub fn getFontDefault() Font {
-    return cdef.GetFontDefault();
-}
-
-/// Load font from file into GPU memory (VRAM)
-pub fn loadFont(fileName: [*:0]const u8) Font {
-    return cdef.LoadFont(@as([*c]const u8, @ptrCast(fileName)));
-}
-
-/// Load font from Image (XNA style)
-pub fn loadFontFromImage(image: Image, key: Color, firstChar: i32) Font {
-    return cdef.LoadFontFromImage(image, key, @as(c_int, firstChar));
 }
 
 /// Check if a font is valid (font data loaded, WARNING: GPU texture not checked)
@@ -4458,16 +4573,6 @@ pub fn drawGrid(slices: i32, spacing: f32) void {
     cdef.DrawGrid(@as(c_int, slices), spacing);
 }
 
-/// Load model from files (meshes and materials)
-pub fn loadModel(fileName: [*:0]const u8) Model {
-    return cdef.LoadModel(@as([*c]const u8, @ptrCast(fileName)));
-}
-
-/// Load model from generated mesh (default material)
-pub fn loadModelFromMesh(mesh: Mesh) Model {
-    return cdef.LoadModelFromMesh(mesh);
-}
-
 /// Check if a model is valid (loaded in GPU, VAO/VBOs)
 pub fn isModelValid(model: Model) bool {
     return cdef.IsModelValid(model);
@@ -4628,11 +4733,6 @@ pub fn genMeshCubicmap(cubicmap: Image, cubeSize: Vector3) Mesh {
     return cdef.GenMeshCubicmap(cubicmap, cubeSize);
 }
 
-/// Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
-pub fn loadMaterialDefault() Material {
-    return cdef.LoadMaterialDefault();
-}
-
 /// Check if a material is valid (shader assigned, map textures loaded in GPU)
 pub fn isMaterialValid(material: Material) bool {
     return cdef.IsMaterialValid(material);
@@ -4738,19 +4838,9 @@ pub fn getMasterVolume() f32 {
     return cdef.GetMasterVolume();
 }
 
-/// Load wave data from file
-pub fn loadWave(fileName: [*:0]const u8) Wave {
-    return cdef.LoadWave(@as([*c]const u8, @ptrCast(fileName)));
-}
-
 /// Checks if wave data is valid (data loaded and parameters)
 pub fn isWaveValid(wave: Wave) bool {
     return cdef.IsWaveValid(wave);
-}
-
-/// Load sound from file
-pub fn loadSound(fileName: [*:0]const u8) Sound {
-    return cdef.LoadSound(@as([*c]const u8, @ptrCast(fileName)));
 }
 
 /// Load sound from wave data
@@ -4858,11 +4948,6 @@ pub fn unloadWaveSamples(samples: []f32) void {
     cdef.UnloadWaveSamples(@as([*c]f32, @ptrCast(samples)));
 }
 
-/// Load music stream from file
-pub fn loadMusicStream(fileName: [*:0]const u8) Music {
-    return cdef.LoadMusicStream(@as([*c]const u8, @ptrCast(fileName)));
-}
-
 /// Checks if a music stream is valid (context and buffers initialized)
 pub fn isMusicValid(music: Music) bool {
     return cdef.IsMusicValid(music);
@@ -4931,11 +5016,6 @@ pub fn getMusicTimeLength(music: Music) f32 {
 /// Get current music time played (in seconds)
 pub fn getMusicTimePlayed(music: Music) f32 {
     return cdef.GetMusicTimePlayed(music);
-}
-
-/// Load audio stream (to stream raw audio pcm data)
-pub fn loadAudioStream(sampleRate: u32, sampleSize: u32, channels: u32) AudioStream {
-    return cdef.LoadAudioStream(@as(c_uint, sampleRate), @as(c_uint, sampleSize), @as(c_uint, channels));
 }
 
 /// Checks if an audio stream is valid (buffers initialized)
