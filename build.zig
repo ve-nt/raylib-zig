@@ -354,6 +354,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
     });
+    raylib_test.linkLibC();
 
     const raygui_test = b.addTest(.{
         .root_source_file = b.path("lib/raygui.zig"),
@@ -361,6 +362,7 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
     raygui_test.root_module.addImport("raylib-zig", raylib);
+    raygui_test.linkLibC();
 
     const test_step = b.step("test", "Check for library compilation errors");
     test_step.dependOn(&raylib_test.step);
